@@ -56,27 +56,20 @@ void init_font(void)
     stbtt_PackBegin(&spc, bitmap, BITMAP_WIDTH, BITMAP_WIDTH, STRIDE_IN_BYTES, PADDING, NULL);
 
     char* path;
-    //path = "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf";
-    path = "../soultaker/assets/fonts/Space_Mono/SpaceMono-Regular.ttf";
+    path = "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf";
 
     FILE* fptr = fopen(path, "rb");
     fread(ttf_buffer, sizeof(char), TTF_BUFFER_SIZE, fptr);
     fclose(fptr);
-
-    stbtt_InitFont(&info, ttf_buffer, OFFSET);
 
     font_range.font_size = FONT_SIZE;
     font_range.first_unicode_codepoint_in_range = CHAR_OFFSET; 
     font_range.array_of_unicode_codepoints = NULL;
     font_range.num_chars = NUM_CHARS;       
     font_range.chardata_for_range = chars;
-
+    stbtt_InitFont(&info, ttf_buffer, OFFSET);
     stbtt_PackFontRanges(&spc, ttf_buffer, FONT_INDEX, &font_range, NUM_RANGES);
-
     stbtt_PackEnd(&spc);
-
-    //for  (int i = 0; i < BITMAP_WIDTH*BITMAP_WIDTH; i++)
-    //    bitmap[i] = 255;
 
     stbi_write_png("out.png", BITMAP_WIDTH, BITMAP_WIDTH, 1, bitmap, 0);
 
@@ -157,16 +150,18 @@ void render_text(float x, float y, char* text)
     GLuint vao, vbo;
     int cnt = 0;
 
+    float xtest = x;
     for (int i = 0; text[i] != '\0'; i++) {
         if (text[i] < CHAR_OFFSET && text[i] >= CHAR_OFFSET+NUM_CHARS)
             continue;
         stbtt_aligned_quad q;
+        xtest += chars[text[i]-CHAR_OFFSET].xadvance;
         stbtt_GetPackedQuad(chars, BITMAP_WIDTH, BITMAP_WIDTH, text[i]-CHAR_OFFSET, &x, &y, &q, 0);
         push(data, cnt, q);
-        for (int k = 0; k < 6; k++) {
-            printf("%f %f %f %f\n", data[24*cnt+4*k], data[24*cnt+4*k+1], data[24*cnt+4*k+2], data[24*cnt+4*k+3]);
-       }
-        puts("");
+        //printf("%f %f %f\n", x, xtest, q.x1 - q.x0);
+        //for (int k = 0; k < 6; k++)
+        //    printf("%f %f %f %f\n", data[24*cnt+4*k], data[24*cnt+4*k+1], data[24*cnt+4*k+2], data[24*cnt+4*k+3]);
+        //puts("");
         cnt++;
     }
 
@@ -201,7 +196,7 @@ int main()
     while (!glfwWindowShouldClose(window)) {
         glClearColor(220, 220, 220, 255);
         glClear(GL_COLOR_BUFFER_BIT);
-        render_text(20, 50, "The quick brown fox jumps over the lazy dog");
+        render_text(0, 50, "The quick brown fox jumps over the lazy dog");
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
