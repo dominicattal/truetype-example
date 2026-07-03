@@ -56,7 +56,8 @@ void init_font(void)
     stbtt_PackBegin(&spc, bitmap, BITMAP_WIDTH, BITMAP_WIDTH, STRIDE_IN_BYTES, PADDING, NULL);
 
     char* path;
-    path = "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf";
+    path = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf";
+    //path = "../soultaker/assets/fonts/Space_Mono/SpaceMono-Regular.ttf";
 
     FILE* fptr = fopen(path, "rb");
     fread(ttf_buffer, sizeof(char), TTF_BUFFER_SIZE, fptr);
@@ -68,6 +69,7 @@ void init_font(void)
     font_range.num_chars = NUM_CHARS;       
     font_range.chardata_for_range = chars;
     stbtt_InitFont(&info, ttf_buffer, OFFSET);
+    stbtt_PackSetOversampling(&spc, 4, 4);
     stbtt_PackFontRanges(&spc, ttf_buffer, FONT_INDEX, &font_range, NUM_RANGES);
     stbtt_PackEnd(&spc);
 
@@ -197,6 +199,7 @@ int main()
         glClearColor(220, 220, 220, 255);
         glClear(GL_COLOR_BUFFER_BIT);
         render_text(0, 50, "The quick brown fox jumps over the lazy dog");
+        render_text(0, 100, "Memory");
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
